@@ -2,3 +2,4 @@ Flask
 nselib
 nsepython
 gunicorn
+Flask-Cors
