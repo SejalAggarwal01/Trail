@@ -8,7 +8,7 @@ def main():
             raise ValueError("Unexpected response format from API")
         print("API call successful. Data:", data)
     except Exception as e:
-        print("Error during API call:",e)
+        print("Error during API call:",e)
 
 
 if __name__ == "__main__":
