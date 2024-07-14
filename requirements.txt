@@ -1,2 +1,4 @@
 Flask
-flask-cors
+nselib
+nsepython
+gunicorn

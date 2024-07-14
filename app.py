@@ -1,14 +1,10 @@
-from flask import Flask, request, jsonify
-from flask_cors import CORS
+from flask import Flask, jsonify
+from nselib import Nse
 
 app = Flask(__name__)
-CORS(app)
+nse = Nse()
 
-@app.route('/get-data', methods=['GET'])
-def get_data():
-    # Your Python code to get the data
-    data = {"message": "Hello from Flask!"}
-    return jsonify(data)
-
-if __name__ == '__main__':
-    app.run(debug=True)
+@app.route('/api/get_stock_info', methods=['GET'])
+def get_stock_info():
+    stock_data = nse.get_quote('TCS')
+    return jsonify(stock_data)
