@@ -3,9 +3,23 @@ from nsepython import nse_eq
 from nselib import capital_market
 from flask_cors import CORS
 import logging
+import os
 
 app = Flask(__name__)
 CORS(app)
+
+
+if 'RENDER' in os.environ:  # Check if running on Render
+    stream_handler = logging.StreamHandler()
+    stream_handler.setLevel(logging.INFO)
+    app.logger.addHandler(stream_handler)
+else:
+    # Set up logging to a file for local development
+    log_dir = 'logs'
+    if not os.path.exists(log_dir):
+        os.makedirs(log_dir)
+    logging.basicConfig(filename=os.path.join(log_dir, 'error.log'), level=logging.DEBUG)
+
 
 def get_indices():
     try:
@@ -20,8 +34,8 @@ def get_indices():
             })
         return result
     except Exception as e:
-        logging.error("Error occurred in get_indices: %s", str(e))
-        return {'error': str(e)}
+        app.logger.error("Error occurred in get_indices: %s", str(e), exc_info=True)
+        return {f'error',str(e)}
 
 
 
