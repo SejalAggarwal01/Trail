@@ -2,6 +2,7 @@ from flask import Flask, jsonify
 from nsepython import nse_eq
 from nselib import capital_market
 from flask_cors import CORS
+import logging
 
 app = Flask(__name__)
 CORS(app)
@@ -19,11 +20,12 @@ def get_indices():
             })
         return result
     except Exception as e:
+        logging.error("Error occurred in get_indices: %s", str(e))
         return {'error': str(e)}
+
 
 
 @app.route('/api/get_stock_info', methods=['GET'])
 def indices():
     response_data = get_indices()
     return jsonify(response_data)
-
