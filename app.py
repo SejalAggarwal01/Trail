@@ -17,6 +17,8 @@ def scrape_with_selenium(symbol):
         options.add_argument('--headless')
         options.add_argument('--disable-extensions')
         options.add_argument('--disable-plugins')
+        options.add_argument('--no-sandbox')  # Required for Docker
+        options.add_argument('--disable-dev-shm-usage')  # Required for Docker
         driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
         # Define the URL
@@ -67,4 +69,4 @@ def scrape_endpoint():
         return jsonify({'error': 'Failed to scrape data'}), 500
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)  # Adjust host and port as needed
+    app.run(host='0.0.0.0', port=5000)  # Ensure Flask listens on all interfaces
