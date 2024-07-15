@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
@@ -10,12 +11,19 @@ app = Flask(__name__)
 
 def scrape_with_selenium(symbol):
     try:
-        # Setup the Chrome WebDriver with options
         options = Options()
         options.add_argument('--headless')
-        options.add_argument('--disable-extensions')
-        options.add_argument('--disable-plugins')
+        options.add_argument('--disable-gpu')  # Disable GPU usage for headless mode stability
+        options.add_argument('--no-sandbox')   # Required when running as root user
+        options.add_argument('--disable-extensions')  # Disable loading of extensions
+        options.add_argument('--disable-plugins')     # Disable loading of plugins
+        options.add_argument('--enable-logging')
+        options.add_argument('--v=1')
+
+
+        # Configure WebDriver with ChromeDriverManager
         driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+
 
         # Define the URL
         url = f'https://ticker.finology.in/company/{symbol}'
@@ -23,10 +31,10 @@ def scrape_with_selenium(symbol):
         # Open the webpage
         driver.get(url)
 
-        # Use explicit wait for the elements to be present
+        # Use explicit waits for elements to load
         wait = WebDriverWait(driver, 10)
 
-        # Define the CSS selectors for the required divs
+        # Define CSS selectors for required divs
         selectors = [
             'div#mainContent_ProsAndCons',
             'div#mainContent_updAddRatios',
@@ -43,7 +51,7 @@ def scrape_with_selenium(symbol):
             data = [element.text.strip() for element in elements]
             scraped_data[selector] = data
 
-        # Close the browser
+        # Close the WebDriver
         driver.quit()
 
         return scraped_data
