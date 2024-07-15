@@ -1,2 +1,4 @@
-nselib
 flask
+selenium
+webdriver_manager
+gunicorn
