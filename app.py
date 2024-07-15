@@ -1,7 +1,5 @@
-import time
 from flask import Flask, request, jsonify
 from selenium import webdriver
-from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
@@ -17,8 +15,6 @@ def scrape_with_selenium(symbol):
         options.add_argument('--headless')
         options.add_argument('--disable-extensions')
         options.add_argument('--disable-plugins')
-        options.add_argument('--no-sandbox')  # Required for Docker
-        options.add_argument('--disable-dev-shm-usage')  # Required for Docker
         driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
         # Define the URL
@@ -61,7 +57,7 @@ def scrape_endpoint():
     symbol = request.json.get('symbol')
     if not symbol:
         return jsonify({'error': 'Symbol not provided'}), 400
-    
+
     data = scrape_with_selenium(symbol)
     if data:
         return jsonify(data), 200
@@ -69,4 +65,5 @@ def scrape_endpoint():
         return jsonify({'error': 'Failed to scrape data'}), 500
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)  # Ensure Flask listens on all interfaces
+    # Run Flask app with Gunicorn server
+    app.run(host='0.0.0.0', port=5000)

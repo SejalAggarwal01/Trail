@@ -12,8 +12,8 @@ RUN apt-get update && \
     apt-get install -y wget unzip gnupg && \
     rm -rf /var/lib/apt/lists/*
 
-# Install Flask, Selenium, and WebDriver Manager
-RUN pip install --no-cache-dir flask selenium webdriver-manager
+# Install Flask, Selenium, WebDriver Manager, and Gunicorn
+RUN pip install --no-cache-dir flask selenium webdriver-manager gunicorn
 
 # Install Chrome and ChromeDriver
 RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - && \
@@ -27,5 +27,5 @@ RUN wget -q -O /tmp/chromedriver.zip https://chromedriver.storage.googleapis.com
     unzip /tmp/chromedriver.zip -d /usr/local/bin/ && \
     rm /tmp/chromedriver.zip
 
-# Command to run the Flask application
-CMD ["python", "app.py"]
+# Command to run the Flask application with Gunicorn
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]
