@@ -1,70 +1,35 @@
-import time
-from flask import Flask, request, jsonify
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
+import time
 
-app = Flask(__name__)
+# Set up Chrome options
+chrome_options = Options()
+chrome_options.add_argument("--headless")  # Ensure GUI is off for server-side operation
 
-def scrape_with_selenium(symbol):
-    try:
-        # Setup the Chrome WebDriver with options
-        options = Options()
-        options.add_argument('--headless')
-        options.add_argument('--disable-extensions')
-        options.add_argument('--disable-plugins')
-        driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+# Set up the WebDriver
+webdriver_service = Service(ChromeDriverManager().install())
+driver = webdriver.Chrome(service=webdriver_service, options=chrome_options)
 
-        # Define the URL
-        url = f'https://ticker.finology.in/company/{symbol}'
+# IMDb URL for top movies
+url = "https://www.imdb.com/chart/top/"
+driver.get(url)
 
-        # Open the webpage
-        driver.get(url)
+# Wait for the page to load
+time.sleep(5)
 
-        # Use explicit wait for the elements to be present
-        wait = WebDriverWait(driver, 10)
+# Scraping data using Selenium
+movie_elements = driver.find_elements(By.XPATH, "//td[@class='titleColumn']/a")
+rating_elements = driver.find_elements(By.XPATH, "//td[@class='ratingColumn imdbRating']/strong")
 
-        # Define the CSS selectors for the required divs
-        selectors = [
-            'div#mainContent_ProsAndCons',
-            'div#mainContent_updAddRatios',
-            'div#mainContent_pricesummary',
-            'div#mainContent_clsprice'
-        ]
+# Print the top 10 movies and their ratings
+print("Top 10 Movies on IMDb:")
+for i in range(10):
+    movie_title = movie_elements[i].text
+    movie_rating = rating_elements[i].text
+    print(f"{i+1}. {movie_title} - Rating: {movie_rating}")
 
-        scraped_data = {}
-
-        for selector in selectors:
-            elements = wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, selector)))
-
-            # Extract and store text content
-            data = [element.text.strip() for element in elements]
-            scraped_data[selector] = data
-
-        # Close the browser
-        driver.quit()
-
-        return scraped_data
-
-    except Exception as e:
-        print(f"An error occurred: {e}")
-        return None
-
-@app.route('/scrape', methods=['POST'])
-def scrape_endpoint():
-    symbol = request.json.get('symbol')
-    if not symbol:
-        return jsonify({'error': 'Symbol not provided'}), 400
-    
-    data = scrape_with_selenium(symbol)
-    if data:
-        return jsonify(data), 200
-    else:
-        return jsonify({'error': 'Failed to scrape data'}), 500
-
-if __name__ == '__main__':
-    app.run(debug=True)
+# Close the WebDriver
+driver.quit()

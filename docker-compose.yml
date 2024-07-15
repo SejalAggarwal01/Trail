@@ -1,0 +1,22 @@
+version: '3.8'
+services:
+  web:
+    build: .
+    command: gunicorn -b 0.0.0.0:5000 main:app
+    volumes:
+      - .:/app
+    ports:
+      - "5000:5000"
+    depends_on:
+      - redis
+
+  redis:
+    image: "redis:alpine"
+
+  worker:
+    build: .
+    command: celery -A main.celery worker --loglevel=info
+    volumes:
+      - .:/app
+    depends_on:
+      - redis
